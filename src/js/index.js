@@ -14,6 +14,19 @@ errorMsq.style.color = 'red';
 errorMsq.style.fontWeight = 'bold';
 errorMsq.hidden = true;
 
+fetchBreeds()
+  .then(breeds => {
+    const breedSelectOptionMarkup = breeds
+      .map(({ id, name }) => `<option value="${id}">${name}</option>`)
+      .join('');
+    breedSelect.innerHTML = breedSelectOptionMarkup;
+    breedSelect.hidden = false;
+    loaderMsg.hidden = true;
+  })
+  .catch(error => {
+    handleFetchError();
+  });
+
 function selectBreedHandler() {
   const breedId = breedSelect.value;
 
@@ -39,26 +52,16 @@ function selectBreedHandler() {
       catInfoDiv.innerHTML = catInfoMarkup;
     })
     .catch(error => {
-      catInfoDiv.innerHTML = '';
-      breedSelect.hidden = true;
-      loaderMsg.hidden = true;
-      errorMsq.hidden = false;
+      handleFetchError();
     });
 }
 
-fetchBreeds()
-  .then(breeds => {
-    const breedSelectOptionMarkup = breeds
-      .map(({ id, name }) => `<option value="${id}">${name}</option>`)
-      .join('');
-    breedSelect.innerHTML = breedSelectOptionMarkup;
-    breedSelect.hidden = false;
-    loaderMsg.hidden = true;
-  })
-  .catch(error => {
-    loaderMsg.hidden = true;
-    errorMsq.hidden = false;
-  });
+function handleFetchError() {
+  catInfoDiv.innerHTML = '';
+  breedSelect.hidden = true;
+  loaderMsg.hidden = true;
+  errorMsq.hidden = false;
+}
 
 function getCatInfoMarkup({ url, name, temperament, description }) {
   return `<div class="cat-info-img">
