@@ -5,33 +5,19 @@ const loaderMsg = document.querySelector('.loader');
 const errorMsq = document.querySelector('.error');
 const catInfoDiv = document.querySelector('div.cat-info');
 
-breedSelect.addEventListener('change', selectBreedHandler);
-breedSelect.hidden = true;
+const showLoadingMsg = () => loaderMsg.classList.remove('visually-hidden');
+const hideLoadingMsg = () => loaderMsg.classList.add('visually-hidden');
 
-loaderMsg.style.fontWeight = 'bold';
+const showErrorMsg = () => errorMsq.classList.remove('visually-hidden');
+const hideErrorMsg = () => errorMsq.classList.add('visually-hidden');
 
-errorMsq.style.color = 'red';
-errorMsq.style.fontWeight = 'bold';
-errorMsq.hidden = true;
-
-fetchBreeds()
-  .then(breeds => {
-    const breedSelectOptionMarkup = breeds
-      .map(({ id, name }) => `<option value="${id}">${name}</option>`)
-      .join('');
-    breedSelect.innerHTML = breedSelectOptionMarkup;
-    breedSelect.hidden = false;
-    loaderMsg.hidden = true;
-  })
-  .catch(error => {
-    handleFetchError();
-  });
-
-function selectBreedHandler() {
+const selectBreedHandler = () => {
   const breedId = breedSelect.value;
 
   catInfoDiv.innerHTML = '';
-  loaderMsg.hidden = false;
+
+  hideErrorMsg();
+  showLoadingMsg();
 
   fetchCatByBreed(breedId)
     .then(breed => {
@@ -47,23 +33,22 @@ function selectBreedHandler() {
         description,
       });
 
-      loaderMsg.hidden = true;
+      hideLoadingMsg();
 
       catInfoDiv.innerHTML = catInfoMarkup;
     })
     .catch(error => {
       handleFetchError();
     });
-}
+};
 
-function handleFetchError() {
+const handleFetchError = () => {
   catInfoDiv.innerHTML = '';
-  breedSelect.hidden = true;
-  loaderMsg.hidden = true;
-  errorMsq.hidden = false;
-}
+  hideLoadingMsg();
+  showErrorMsg();
+};
 
-function getCatInfoMarkup({ url, name, temperament, description }) {
+const getCatInfoMarkup = ({ url, name, temperament, description }) => {
   return `<div class="cat-info-img">
         <img
           src="${url}"
@@ -77,4 +62,26 @@ function getCatInfoMarkup({ url, name, temperament, description }) {
         <p class="breed-temperament">
         <span class="breed-temperament-title">Temperament: </span>${temperament}</p>
       </div>`;
-}
+};
+
+breedSelect.addEventListener('change', selectBreedHandler);
+
+loaderMsg.style.fontWeight = 'bold';
+
+errorMsq.style.color = 'red';
+errorMsq.style.fontWeight = 'bold';
+
+showLoadingMsg();
+
+fetchBreeds()
+  .then(breeds => {
+    const breedSelectOptionMarkup = breeds
+      .map(({ id, name }) => `<option value="${id}">${name}</option>`)
+      .join('');
+    breedSelect.innerHTML = breedSelectOptionMarkup;
+    hideLoadingMsg();
+    breedSelect.classList.remove('visually-hidden');
+  })
+  .catch(error => {
+    handleFetchError();
+  });
